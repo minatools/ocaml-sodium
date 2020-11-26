@@ -33,6 +33,17 @@ important to be mindful of security invariants. In particular, you
 should ensure that nonces used for cryptographic operations are
 **never** repeated with the same key set.
 
+## Building
+
+### Bazel
+
+Prerequisite: Bazel 3.7.0
+
+Build the OCaml library:  `$ bazel build lib:sodium`
+Build just libsodium:     `$ bazel build lib:libsodium`
+
+See `bzl/tools/user.bazelrc` for a sample private rc file.
+
 ## Tests
 
 Internal consistency tests may be found in `lib_test`.
