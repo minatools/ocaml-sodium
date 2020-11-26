@@ -1,6 +1,6 @@
 bazel-*
 .bazel
-user.bazelrc
+./user.bazelrc
 
 _build/
 *.native
