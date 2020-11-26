@@ -40,7 +40,10 @@ should ensure that nonces used for cryptographic operations are
 Prerequisite: Bazel 3.7.0
 
 Build the OCaml library:  `$ bazel build lib:sodium`
+
 Build just libsodium:     `$ bazel build lib:libsodium`
+
+The current version uses libsodium version 1.0.18-RELEASE from `https://github.com/jedisct1/libsodium`.
 
 See `bzl/tools/user.bazelrc` for a sample private rc file.
 
