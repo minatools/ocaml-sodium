@@ -1,14 +1,22 @@
+PACKAGES = {
+    "bigarray": [],
+    "bytes": [],
+    "core_kernel": ["v0.12.3"],
+    "ctypes": ["0.17.1", ["ctypes.foreign", "ctypes.stubs"]],
+    "ocaml-compiler-libs": ["v0.11.0", ["compiler-libs.common"]],
+    "ounit2": ["2.2.3"],
+}
+
 opam = struct(
-    opam_version = "2.0",
-    packages = {
-        "bigarray": ":ocaml", # ocamlfind: distributed with Ocaml
-        "bytes": ":ocaml", # ocamlfind: distributed with OCaml 4.02 or above
-        "core_kernel": "v0.12.3",
-        "ctypes": "0.17.1",
-        "ctypes.foreign": "0.4.0",
-        "ctypes.stubs": "0.4.0",
-        "ocaml-compiler-libs": "v0.11.0",
-        "compiler-libs.common": "v0.11.0",
-        "ounit2": "2.2.3",
+    version = "2.0",
+    switches  = {
+        "mina-0.1.0": struct(
+            compiler = "4.07.1",
+            packages = PACKAGES
+        ),
+        "4.07.1": struct(
+            compiler = "4.07.1",
+            packages = PACKAGES
+        )
     }
 )
