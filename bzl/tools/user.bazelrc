@@ -10,13 +10,13 @@ build --sandbox_debug
 # build --jobs 600
 
 #### Config flags ####
-# build --//verbose                 # enable verbose everywhere
+# build --@ocaml//verbose                 # enable verbose for all ocaml_* rules
 
 ################################################################
 # build:macos --macos_minimum_os='10.15'
 # build --config=macos
 
-## DO NOT USE on MacOS:
+## Use cautiously - the symlinks may befuddle Bazel in some situations.
 # build --symlink_prefix=.bazel/   # use hidden dir instead of top-level symlinks
 ## DO NOT USE on MacOS:
 # build --experimental_no_product_name_out_symlink # do not create `bazel-out` symlink
