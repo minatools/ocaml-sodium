@@ -28,8 +28,9 @@ ocaml_archive(
         ":Sodium_storage",
     ],
     cc_deps = {
-        ":libsodium": "default",
-        "//lib_gen:sodium_stubs": "default"
+        # WARNING: order matters here, sticky cc transitivity not yet implemented
+        "//lib_gen:sodium_stubs": "default",
+        ":libsodium": "default"
     },
     visibility = ["//visibility:public"],
 )
