@@ -2,8 +2,7 @@
 ## or pass "--bazelrc=bzl/tools/user.bazelrc" as first arg to build cmd.
 
 build --color=yes
-build --subcommands=pretty_print
-# build --subcommands   ## no pretty print
+build --subcommands=pretty_print # omit "=pretty_print" for compact presentation
 build --verbose_failures
 build --sandbox_debug
 # build --show_timestamps
@@ -12,10 +11,6 @@ build --sandbox_debug
 
 #### Config flags ####
 # build --//verbose                 # enable verbose everywhere
-
-## override external repos:
-# common --override_repository=obazl_rules_opam=/ABSOLUTE/PATH/TO/obazl_rules_opam
-# common --override_repository=obazl_rules_ocaml=/ABSOLUTE/PATH/TO/obazl_rules_ocaml
 
 ################################################################
 # build:macos --macos_minimum_os='10.15'
