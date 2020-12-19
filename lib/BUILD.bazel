@@ -6,16 +6,6 @@ load("@obazl_rules_ocaml//ocaml:rules.bzl",
      "ocaml_interface",
      "ocaml_module")
 
-LINKOPTS = select({
-    "@ocaml//mode:bytecode": ["-dllib", "-sodium_stubs"],
-    "@ocaml//mode:native": ["-cclib", "-lsodium_stubs"]
-})
-
-LINKDEPS = select({
-    "@ocaml//mode:bytecode": [],
-    "@ocaml//mode:native": []
-})
-
 ##############
 ocaml_archive(
     name = "sodium",
@@ -73,6 +63,7 @@ ocaml_module(
     ]
 )
 
+################################################################
 configure_make(
     name = "libsodium",
     configure_env_vars = select({
@@ -89,7 +80,6 @@ configure_make(
     shared_libraries = select({
         "//bzl/host:macos": ["libsodium.dylib"],
         "//bzl/host:linux": ["libsodium.so"],
-        # "//conditions:default": [],
-    }),
+    }, no_match_error = "Unsupported platform. Linux or MacOS only."),
     visibility = ["//visibility:public"],
 )

@@ -57,8 +57,7 @@ ocaml_module(
     name = "Sodium_bindgen",
     src = "sodium_bindgen.ml",
     opts = [
-        "-w",
-        "-33"                # Error (warning 33): unused open Ctypes.
+        "-w", "-33"                # Error (warning 33): unused open Ctypes.
     ],
     deps = [
         "@opam//pkg:ctypes.stubs",
@@ -86,10 +85,8 @@ ocaml_module(
     name = "Sodium_types_detected",
     src = ":sodium_types_detected.ml",
     opts = [
-        "-w",
-        "-9", # Error (warning 9): the following labels are not bound in this record pattern:
-        "-w",
-        "-27" # Error (warning 27): unused variable
+        "-w", "-9", # Error (warning 9): the following labels are not bound in this record pattern:
+        "-w", "-27" # Error (warning 27): unused variable
     ],
     deps = ["@opam//pkg:ctypes.stubs"],
     visibility = ["//lib:__pkg__"]
@@ -141,8 +138,7 @@ ocaml_module(
     name = "Sodium_typegen",
     src = "sodium_typegen.ml",
     opts = [
-        "-w",                # obazl:retain
-        "-33"                # Error (warning 33): unused open Ctypes.
+        "-w", "-33"                # Error (warning 33): unused open Ctypes.
     ],
     deps = [
         "@opam//pkg:ctypes.stubs",
