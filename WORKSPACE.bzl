@@ -1,6 +1,8 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
+load("@obazl_rules_ocaml//ocaml:providers.bzl", "OpamConfig", "BuildConfig")
+
 ## WARNING: the makefile changed, for now we can only do 1.0.18-RELEASE
 versions = {
     "1.0.18-RELEASE": struct(
@@ -33,3 +35,30 @@ def libsodium_fetch_repo(version):
             "visibility = [\"//visibility:public\"])",
         ]),
     )
+
+################################################################
+opam_pkgs = {
+    # "bigarray": [],  ## not an opam pkg
+    # "bytes": [],  ## not an opam pkg
+    "core_kernel": ["v0.12.3"],
+    "ctypes": ["0.17.1", ["ctypes.foreign", "ctypes.stubs"]],
+    "ocaml-compiler-libs": ["v0.11.0", ["compiler-libs.common"]],
+    "ounit2": ["2.2.3"],
+}
+
+opam = OpamConfig(
+    version = "2.0",
+    builds  = {
+        "mina-0.1.0": BuildConfig(
+            default  = True,
+            switch   = "4.07.1",
+            compiler = "4.07.1",
+            packages = opam_pkgs,
+            verify   = True
+        ),
+        "4.07.1": BuildConfig(
+            compiler = "4.07.1",
+            packages = opam_pkgs
+        )
+    }
+)

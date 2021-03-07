@@ -1,66 +1,66 @@
 load("@rules_foreign_cc//tools/build_defs:configure.bzl", "configure_make")
 
-load("@obazl_rules_ocaml//ocaml:rules.bzl",
-     "ocaml_archive",
-     "ocaml_executable",
-     "ocaml_interface",
-     "ocaml_module")
+load(
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
+    "ocaml_executable",
+    "ocaml_library",
+    "ocaml_module",
+    "ocaml_signature",
+)
 
 ##############
-ocaml_archive(
+ocaml_library(
     name = "sodium",
-    opts = [    ],
-    deps = [
-        "//lib_gen:Sodium_generated",
+    # opts = ["-linkall"],
+    modules = [
+        ":_Sodium",
         "//lib_gen:Sodium_types",
         "//lib_gen:Sodium_types_detected",
-        ":_Sodium",
-        ":Sodium_storage",
     ],
-    cc_deps = {
-        # WARNING: order matters here, sticky cc transitivity not yet implemented
-        "//lib_gen:sodium_stubs": "default",
-        ":libsodium": "default"
-    },
     visibility = ["//visibility:public"],
 )
 
 #############
 ocaml_module(
     name = "_Sodium",
-    src  = "sodium.ml",
-    intf = ":_Sodium.cmi",
-    opts = [],
+    sig  = ":_Sodium.cmi",
+    struct = "sodium.ml",
+    cc_deps = {
+        "//lib_gen:sodium_stubs": "default",
+        ":libsodium": "default",
+    },
     deps = [
-        "@opam//pkg:bytes",
-        "@opam//pkg:bigarray",
-        "@opam//pkg:ctypes.stubs",
         ":Sodium_storage",
         "//lib_gen:Sodium_bindings",
-        "//lib_gen:Sodium_generated"
+        "//lib_gen:Sodium_generated",
     ],
-    visibility = ["//visibility:public"]
-    # visibility = ["//lib_gen:__pkg__"]
+    deps_opam = [
+       "bigarray",
+        "bytes",
+        "ctypes.stubs",
+    ],
+    visibility = ["//visibility:public"],
+   # visibility = ["//lib_gen:__pkg__"]
 )
 
-ocaml_interface(
+ocaml_signature(
     name = "_Sodium.cmi",
-    src  = "sodium.mli",
+    src = "sodium.mli",
 )
 
 #############
 ocaml_module(
     name = "Sodium_storage",
-    src = "sodium_storage.ml",
     opts = select({
         "@ocaml//verbose:enabled": ["-absname"],
-        "//conditions:default": []
+        "//conditions:default": [],
     }),
-    deps = ["@opam//pkg:ctypes"],
+    struct = "sodium_storage.ml",
     visibility = [
-        ":__pkg__",
-        "//lib_gen:__pkg__"
-    ]
+        # ":__pkg__",
+        "//lib_gen:__pkg__",
+    ],
+    deps_opam = ["ctypes"],
 )
 
 ################################################################
@@ -70,16 +70,19 @@ configure_make(
         "//bzl/host:macos": {
             "AR": "",
             "CFLAGS": "--std=c99 -Wall -pedantic -Wno-pointer-sign",
-            "CXXFLAGS":  "-Wall -pedantic -Wno-pointer-sign"
+            "CXXFLAGS": "-Wall -pedantic -Wno-pointer-sign",
         },
-        "//conditions:default": {}
+        "//conditions:default": {},
     }),
     lib_source = "@libsodium//:all",
     out_lib_dir = "lib",
+    shared_libraries = select(
+        {
+            "//bzl/host:macos": ["libsodium.dylib"],
+            "//bzl/host:linux": ["libsodium.so"],
+        },
+        no_match_error = "Unsupported platform. Linux or MacOS only.",
+    ),
     static_libraries = ["libsodium.a"],
-    shared_libraries = select({
-        "//bzl/host:macos": ["libsodium.dylib"],
-        "//bzl/host:linux": ["libsodium.so"],
-    }, no_match_error = "Unsupported platform. Linux or MacOS only."),
     visibility = ["//visibility:public"],
 )

@@ -1,155 +1,182 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load(
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
+    "ocaml_executable",
+    "ocaml_genrule",
+    "ocaml_module",
+)
 
-load("@obazl_rules_ocaml//ocaml:rules.bzl",
-     "ocaml_executable",
-     "ocaml_module")
+#############
+ocaml_module(
+    name = "Sodium_bindings",
+    opts = [],
+    struct = "sodium_bindings.ml",
+    visibility = ["//lib:__pkg__"],
+    deps = [
+        ":Sodium_types",
+        ":Sodium_types_detected",
+        "//lib:Sodium_storage",
+    ],
+    deps_opam = ["ctypes.stubs"]
+)
 
 #############
 ocaml_module(
     name = "Sodium_generated",
-    src  = "sodium_generated.ml",
-    deps = [
-        "@opam//pkg:ctypes.stubs",
+    struct = "sodium_generated.ml",
+    visibility = ["//lib:__pkg__"],
+    deps_opam = [
+        "ctypes.stubs",
     ],
-    visibility = ["//lib:__pkg__"]
 )
 
+#############
+ocaml_module(
+    name = "Sodium_types",
+    struct = "sodium_types.ml",
+    visibility = ["//lib:__pkg__"],
+    deps_opam = ["ctypes.stubs"]
+)
+
+#############
+ocaml_module(
+    name = "Sodium_types_detected",
+    opts = [
+        "-w",
+        "-9",  # Error (warning 9): the following labels are not bound in this record pattern:
+        "-w",
+        "-27",  # Error (warning 27): unused variable
+    ],
+    struct = ":sodium_types_detected.ml",
+    visibility = ["//lib:__pkg__"],
+    deps_opam = ["ctypes.stubs"]
+)
+
+###########
 cc_library(
-    name  = "sodium_stubs",
+    name = "sodium_stubs",
+    srcs = ["sodium_stubs.c"],
+    hdrs = [
+    ],
     copts = ["-I."],
-    srcs  = ["sodium_stubs.c"],
-    hdrs  = [
-    ],
-    deps  = [
+    visibility = ["//visibility:public"],
+    deps = [
+        "//lib:libsodium",
         "@ocaml//csdk/ctypes",
-        "//lib:libsodium"
     ],
-    visibility = ["//visibility:public"]
+    # data = [":genstubs"]
 )
-
 
 ########
-genrule(
+ocaml_genrule(
     name = "genstubs",
-    tools = [":sodium_bindgen"],
     outs = [
         "sodium_stubs.c",
         "sodium_generated.ml",
     ],
     cmd = "\n".join([
-        "mkdir lib",
+        "mkdir lib;",
         "$(location :sodium_bindgen)",
-        "cp lib/sodium* $(RULEDIR)/",
+        "cp lib/sodium_stubs.c $(location sodium_stubs.c);",
+        "cp lib/sodium_generated.ml $(location sodium_generated.ml)",
     ]),
+    tools = [":sodium_bindgen"],
     # visibility = ["//visibility:public"]
 )
+
+# ########
+# ocaml_genrule(
+#     name = "_sodium_generated",
+#     outs = [
+#         "sodium_generated.ml",
+#     ],
+#     cmd = "\n".join([
+#         "mkdir lib;",
+#         "$(location :sodium_bindgen)",
+#         "cp lib/sodium_generated.ml $@",
+#     ]),
+#     tools = [":sodium_bindgen"],
+#     # visibility = ["//visibility:public"]
+# )
 
 #################
 ocaml_executable(
     name = "sodium_bindgen",
     main = ":Sodium_bindgen",
     visibility = ["//visibility:public"],
+    deps = [
+        ":Sodium_bindings",
+        "//lib:Sodium_storage",
+    ],
+    deps_opam = ["ctypes.stubs"]
 )
-
 
 #############
 ocaml_module(
     name = "Sodium_bindgen",
-    src = "sodium_bindgen.ml",
     opts = [
-        "-w", "-33"                # Error (warning 33): unused open Ctypes.
+        "-w",
+        "-33",  # Error (warning 33): unused open Ctypes.
     ],
+    struct = "sodium_bindgen.ml",
     deps = [
-        "@opam//pkg:ctypes.stubs",
+        ":Sodium_bindings",
         "//lib:Sodium_storage",
-        ":Sodium_bindings"
-    ]
-)
-
-#############
-ocaml_module(
-    name = "Sodium_bindings",
-    src = "sodium_bindings.ml",
-    opts = [],
-    deps = [
-        "@opam//pkg:ctypes.stubs",
-        "//lib:Sodium_storage",
-        ":Sodium_types_detected",
-        ":Sodium_types",
     ],
-    visibility = ["//lib:__pkg__"]
-)
-
-#############
-ocaml_module(
-    name = "Sodium_types_detected",
-    src = ":sodium_types_detected.ml",
-    opts = [
-        "-w", "-9", # Error (warning 9): the following labels are not bound in this record pattern:
-        "-w", "-27" # Error (warning 27): unused variable
-    ],
-    deps = ["@opam//pkg:ctypes.stubs"],
-    visibility = ["//lib:__pkg__"]
+    deps_opam = ["ctypes.stubs"]
 )
 
 ########
 genrule(
     name = "genml",
-    tools = [":sodium_types_detect"],
     outs = ["sodium_types_detected.ml"],
     cmd = "\n".join([
         "$(location :sodium_types_detect) > $@",
     ]),
     message = "",
+    tools = [":sodium_types_detect"],
 )
 
 ##########
 cc_binary(
-    name  = "sodium_types_detect",
-    srcs  = [":sodium_types_detect.c"],
+    name = "sodium_types_detect",
+    srcs = [":sodium_types_detect.c"],
     copts = ["-I."],
     deps = [
+        "//lib:libsodium",
         "@ocaml//csdk/ctypes",
-        "//lib:libsodium"
     ],
 )
 
 ########
 genrule(
     name = "genc",
-    tools = [":sodium_typegen"],
     outs = ["sodium_types_detect.c"],
     cmd = "\n".join([
         "mkdir lib_gen",
         "$(location :sodium_typegen)",
-        "cp lib_gen/sodium_types_detect.c $@"
+        "cp lib_gen/sodium_types_detect.c $@",
     ]),
     message = "",
+    tools = [":sodium_typegen"],
 )
 
 #################
 ocaml_executable(
     name = "sodium_typegen",
-    deps = [":Sodium_typegen"]
+    deps = [":Sodium_typegen"],
 )
 
 #############
 ocaml_module(
     name = "Sodium_typegen",
-    src = "sodium_typegen.ml",
     opts = [
-        "-w", "-33"                # Error (warning 33): unused open Ctypes.
+        "-w",
+        "-33",  # Error (warning 33): unused open Ctypes.
     ],
+    struct = "sodium_typegen.ml",
     deps = [
-        "@opam//pkg:ctypes.stubs",
         ":Sodium_types",
-    ]
-)
-
-#############
-ocaml_module(
-    name = "Sodium_types",
-    src = "sodium_types.ml",
-    deps = ["@opam//pkg:ctypes.stubs"],
-    visibility = ["//lib:__pkg__"]
+    ],
+    deps_opam = ["ctypes.stubs"]
 )
