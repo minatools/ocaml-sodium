@@ -17,11 +17,6 @@ bazel_skylib_workspace()
 
 ###############
 git_repository(
-    name = "obazl_tools_bazel",
-    remote = "https://github.com/obazl/tools_bazel",
-    branch = "main",
-)
-git_repository(
     name = "obazl_rules_ocaml",
     remote = "https://github.com/obazl/rules_ocaml",
     branch = "main",
@@ -33,10 +28,10 @@ ocaml_configure(opam=opam, build = "mina-0.1.0")
 
 ################ for building libsodium ################
 http_archive(
-    name = "rules_foreign_cc",
-    strip_prefix="rules_foreign_cc-master",
-    url = "https://github.com/bazelbuild/rules_foreign_cc/archive/master.zip",
-    # sha256 = "3e6b0691fc57db8217d535393dcc2cf7c1d39fc87e9adb6e7d7bab1483915110"
+   name         = "rules_foreign_cc",
+   sha256       = "c2cdcf55ffaf49366725639e45dedd449b8c3fe22b54e31625eb80ce3a240f1e",
+   strip_prefix = "rules_foreign_cc-0.1.0",
+   url          = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.1.0.zip",
 )
 
 load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
