@@ -3,6 +3,7 @@ load(
     "@obazl_rules_ocaml//ocaml:rules.bzl",
     "ocaml_executable",
     "ocaml_genrule",
+    "ocaml_archive",
     "ocaml_module",
 )
 
@@ -47,7 +48,7 @@ ocaml_module(
         "-w",
         "-27",  # Error (warning 27): unused variable
     ],
-    struct = ":sodium_types_detected.ml",
+    struct = "sodium_types_detected.ml",
     visibility = ["//lib:__pkg__"],
     deps_opam = ["ctypes.stubs"]
 )
@@ -81,23 +82,7 @@ ocaml_genrule(
         "cp lib/sodium_generated.ml $(location sodium_generated.ml)",
     ]),
     tools = [":sodium_bindgen"],
-    # visibility = ["//visibility:public"]
 )
-
-# ########
-# ocaml_genrule(
-#     name = "_sodium_generated",
-#     outs = [
-#         "sodium_generated.ml",
-#     ],
-#     cmd = "\n".join([
-#         "mkdir lib;",
-#         "$(location :sodium_bindgen)",
-#         "cp lib/sodium_generated.ml $@",
-#     ]),
-#     tools = [":sodium_bindgen"],
-#     # visibility = ["//visibility:public"]
-# )
 
 #################
 ocaml_executable(
@@ -126,14 +111,13 @@ ocaml_module(
     deps_opam = ["ctypes.stubs"]
 )
 
-########
-genrule(
-    name = "genml",
+########################
+ocaml_genrule(
+    name = "_genml",
     outs = ["sodium_types_detected.ml"],
     cmd = "\n".join([
-        "$(location :sodium_types_detect) > $@",
+        "$(location :sodium_types_detect) > $(location sodium_types_detected.ml)",
     ]),
-    message = "",
     tools = [":sodium_types_detect"],
 )
 
@@ -148,28 +132,27 @@ cc_binary(
     ],
 )
 
-########
-genrule(
+########################
+ocaml_genrule(
     name = "genc",
     outs = ["sodium_types_detect.c"],
     cmd = "\n".join([
         "mkdir lib_gen",
         "$(location :sodium_typegen)",
-        "cp lib_gen/sodium_types_detect.c $@",
+        "cp lib_gen/sodium_types_detect.c $(location sodium_types_detect.c)",
     ]),
-    message = "",
     tools = [":sodium_typegen"],
 )
 
 #################
 ocaml_executable(
     name = "sodium_typegen",
-    deps = [":Sodium_typegen"],
+    deps = [":_Sodium_typegen"],
 )
 
 #############
 ocaml_module(
-    name = "Sodium_typegen",
+    name = "_Sodium_typegen",
     opts = [
         "-w",
         "-33",  # Error (warning 33): unused open Ctypes.

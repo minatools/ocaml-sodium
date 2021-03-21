@@ -3,19 +3,24 @@ load("@rules_foreign_cc//tools/build_defs:configure.bzl", "configure_make")
 load(
     "@obazl_rules_ocaml//ocaml:rules.bzl",
     "ocaml_executable",
-    "ocaml_library",
     "ocaml_module",
+    "ocaml_ns_archive",
     "ocaml_signature",
 )
 
 ##############
-ocaml_library(
+ocaml_ns_archive(
     name = "sodium",
-    # opts = ["-linkall"],
-    modules = [
-        ":_Sodium",
+    opts = ["-linkall"],
+    submodules = [
+        ":Sodium_storage",
+        "//lib_gen:Sodium_bindings",
+        "//lib_gen:Sodium_generated",
         "//lib_gen:Sodium_types",
         "//lib_gen:Sodium_types_detected",
+        ":_Sodium",
+        # "//lib_gen:Sodium_types",
+        # "//lib_gen:Sodium_types_detected",
     ],
     visibility = ["//visibility:public"],
 )
@@ -33,13 +38,15 @@ ocaml_module(
         ":Sodium_storage",
         "//lib_gen:Sodium_bindings",
         "//lib_gen:Sodium_generated",
+        "//lib_gen:Sodium_types",
+        "//lib_gen:Sodium_types_detected",
     ],
     deps_opam = [
        "bigarray",
         "bytes",
         "ctypes.stubs",
     ],
-    visibility = ["//visibility:public"],
+    # visibility = ["//visibility:public"],
    # visibility = ["//lib_gen:__pkg__"]
 )
 
